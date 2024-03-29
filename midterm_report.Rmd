@@ -1,10 +1,27 @@
 ---
-title: "midterm_report"
+title: "P8106 Midterm Project: Predicting COVID-19 Recovery Time"
+author: 
+  - "Guadalupe Antonio Lopez, Gustavo Garcia-Franceschini, Derek Lamb"
+  -  "UNI's: GA2612, GEG2145, DRL2168"
+header-includes:
+    - \usepackage{setspace}\doublespacing
+
 output: pdf_document
-date: "2024-03-29"
 ---
 
 ```{r setup, include=FALSE}
+library(tidyverse)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Introduction
+
+## EDA
+
+## Model Training
+
+## Results 
+
+Remember to talk about `study` as a variable.
+
+## Conclusion
