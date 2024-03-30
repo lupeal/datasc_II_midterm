@@ -110,7 +110,7 @@ To train the models, we partitioned the data into training and testing sets, wit
 
 To predict COVID-19 recovery time, we modeled the data using four approaches -- two linear and two non-linear. For the linear approaches, we selected elastic net and partial least squares regression. For the nonlinear approaches, we selected multivariate adaptive regression splines (MARS) and a general additive model (GAM). 
 
-All models were fitted using the `train()` function in the `caret` package. Although some inputs varied by model, the common inputs were formula or model matrix and response vector, data, method, tuning parameters grid, and cross validation method. 
+All models were fitted using the `train()` function in the `caret` package. Although some inputs varied by model, the common inputs were formula or model matrix and response vector, data, method, tuning parameters grid, and a 10-fold cross validation method. 
 
 the `caret` package
 
@@ -143,12 +143,12 @@ enet_fit <- train(recovery_time ~ .,
                   trControl = ctrl1)
 ```
 
-To fit the elastic net model, we used the model formula with `recovery_time` as the response and all other variables in our training data set to be predictors. Given that we fit an elastic net model, the method specified was `glmnet`, with tuning parameter alpha to be sequenced between 0 and 1 (with length 21) and lambda to be exponentially sequenced between -6 and 1 (with length 100). We settled on this lambda region after fitting the model various times with different regions. We started with a large region (-4 to 4), but realized that our preferred lambda value was close to our lower boundary. Thus, we continued to expand our region until we settled on -6 to 1. Lastly, we used a 10-fold cross validation method.
+To fit the elastic net model, we used the model formula with `recovery_time` as the response and all other variables in our training data set to be predictors. Given that we fit an elastic net model, the method specified was `glmnet`, with tuning parameter alpha to be sequenced between 0 and 1 (with length 21) and lambda to be exponentially sequenced between -6 and 1 (with length 100). We settled on this lambda region after fitting the model various times with different regions. We started with a large region (-4 to 4), but realized that our preferred lambda value was close to our lower boundary. Thus, we continued to expand our region until we settled on -6 to 1.
 
 
 
 
-### Partial Least Squares Regression Model
+### Partial Least Squares (PLS) Regression Model
 
 ```{r, echo = FALSE}
 #PLS
@@ -160,6 +160,10 @@ pls_fit <- train(x_training, y_training,
                  trControl = ctrl1,
                  preProcess = c('center', 'scale'))
 ```
+
+To fit the PLS model, we used the training model matrix, based on our training data, and training response vector. Given that we fit a PLS model, the method specified was `pls`, with number of components ranging between 1 and 15. This range is based on the number of variables in our training model matrix. Additionally, the predictor data was centered and scaled -- specified in the `preProcess` input.
+
+
 
 
 
