@@ -11,13 +11,13 @@ output: pdf_document
 
 ```{r setup, include=FALSE, message = FALSE}
 library(tidyverse)
-library(tidymodels)
 library(caret)
 library(rsample)
 library(corrplot)
 library(gtsummary)
 library(mgcv)
 
+theme_set(theme_bw() + theme(legend.position = "bottom"))
 
 knitr::opts_chunk$set(
   echo = TRUE, 
@@ -31,15 +31,16 @@ knitr::opts_chunk$set(
 This analysis combines three cohort studies regarding recovery time from COVID-19 illness. We have the individual's gender and race, along with other medical information. Among these, stand out their vaccination status and the study (A or B) they were a part of. With this information, we aim to fit a model that can both help us predict recovery time, and help us understand variables strongly associated with increased risk for long COVID-19 recovery times.
 
 ## EDA
-
-```{r}
+```{r load data, echo=FALSE}
 load("files/recovery.RData")
+df_rec <- dat |> 
+  select(-id)
 
-dat_split = initial_split(data = dat, prop = 0.8)
+set.seed(1)
+dat_split = initial_split(data = df_rec, prop = 0.8)
 
-train = training(dat_split)
-
-test = testing(dat_split)
+df_train = training(dat_split)
+df_test = testing(dat_split)
 ```
 
 
@@ -47,19 +48,18 @@ test = testing(dat_split)
 
 We found that the COVID-19 infection recovery time is heavily right-skewed: most of the individuals recovered at around 6 weeks, but there are individuals that only recovered from the infection after three months (or more) of being infected. This may mean that we'll need flexible models to capture the skewness of the response.
 
-```{r}
-ggplot(train) +
+```{r histogram of recovery time, echo=FALSE}
+ggplot(df_train) +
   geom_histogram(aes(x = recovery_time), binwidth = 3, fill = "gold2") +
-  theme_bw() + 
-  labs(title = "COVID-1 recovery time is right-skewed",
+  labs(title = "COVID-19 recovery time is right-skewed",
        x = "Recovery time (days)",
        y = "Count")
 ```
 
 When evaluating the distribution of recovery time, split into study groups, we find that its different for the two distributions. Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time. 
 
-```{r}
-train %>%
+```{r density plot by study, echo=FALSE}
+df_train %>%
   ggplot() +
   geom_density(aes(x = recovery_time, col = study)) +
   theme_bw() + 
@@ -68,23 +68,6 @@ train %>%
        y = "Density",
        color = "Study")
 ```
-
-```{r data import, echo=FALSE}
-load("files/recovery.RData")
-
-df_rec <- dat |> 
-  select(-id)
-
-set.seed(1)
-split <- df_rec |> 
-  initial_split(prop = 0.8)
-
-df_train <- training(split)
-df_test <- testing(split)
-```
-
-
-
 
 We also examined the pairwise correlations of the variables, and the correlations of the covariates with the recovery time. There were two clusters of strong correlation (height, weight, and BMI; hypertension and SBP), but these covariates were functionally dependent upon each other. There were no other strong correlations between variables, and no one covariate had an exceptional correlation to recovery time.
 
@@ -115,7 +98,7 @@ All models were fitted using the `train()` function in the `caret` package. Alth
 the `caret` package
 
 
-```{r, echo = FALSE}
+```{r set cv splits, echo = FALSE}
 set.seed(1)
 
 #matrix models
@@ -131,7 +114,7 @@ ctrl1 <- trainControl(method = 'cv', number = 10)
 
 ### Elastic Net Model
 
-```{r, echo = FALSE}
+```{r enet, echo = FALSE}
 #elastic net
 set.seed(1)
 
@@ -150,7 +133,7 @@ To fit the elastic net model, we used the model formula with `recovery_time` as 
 
 ### Partial Least Squares (PLS) Regression Model
 
-```{r, echo = FALSE}
+```{r pls, echo = FALSE}
 #PLS
 set.seed(1)
 
@@ -168,7 +151,7 @@ To fit the PLS model, we used the training model matrix, based on our training d
 
 ### Multivariate Adaptive Regression Splines Model
 
-```{r, echo = FALSE, message = FALSE}
+```{r mars, echo = FALSE, message = FALSE}
 #MARS
 set.seed(1)
 
@@ -188,7 +171,7 @@ To fit the MARS model, we used the training model matrix and training response v
 
 ### General Additive Model
 
-```{r, echo = FALSE, message = FALSE}
+```{r gam, echo = FALSE, message = FALSE}
 #GAM
 set.seed(1)
 
