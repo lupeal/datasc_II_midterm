@@ -11,14 +11,71 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-knitr::opts_chunk$set(echo = TRUE)
+library(caret)
+library(rsample)
+library(corrplot)
+library(gtsummary)
+
+knitr::opts_chunk$set(
+  echo = TRUE, 
+  fig.width = 6,
+  out.width = "65%",
+  fig.align = "center")
 ```
 
 ## Introduction
 
 ## EDA
 
+```{r data import, echo=FALSE}
+load("files/recovery.RData")
+
+df_rec <- dat |> 
+  select(-id)
+
+set.seed(1)
+split <- df_rec |> 
+  initial_split(prop = 0.8)
+
+df_train <- training(split)
+df_test <- testing(split)
+```
+
+
+
+
+We also examined the pairwise correlations of the variables, and the correlations of the covariates with the recovery time. There were two clusters of strong correlation (height, weight, and BMI; hypertension and SBP), but these covariates were functionally dependent upon each other. There were no other strong correlations between variables, and no one covariate had an exceptional correlation to recovery time.
+
+```{r corrplot, echo=FALSE}
+# convert covariates to numeric
+cor_rec <- df_rec |> 
+  model.matrix(recovery_time ~ ., data = _) 
+
+# put outcome back into matrix
+cor_rec[,1] = df_rec$recovery_time
+colnames(cor_rec)[1] <- "recovery"
+
+# create corrplot
+cor_rec |> 
+  cor() |> 
+  corrplot()
+```
+**Figure M.** Correlogram of study variables.
+
+
 ## Model Training
+To train the models, we partitioned the data into training and testing sets, with 80% of the data (2400 subjects) being assigned to the training set, and the remaining 20% (600 subjects) being assigned to the test set.
+
+We decided to model the data using four approaches, two linear and two non-linear. For the linear approaches, we selected elastic net and partial least squares regression. For the nonlinear approaches, we selected multivariate adaptive regression splines (MARS) and a general additive model (GAM).
+
+ENet
+
+PLS
+
+MARS
+
+GAM
+
 
 In this section, describe the models you used to predict the time to recovery from COVID-19. Briefly state the assumptions made by using the models. Provide a detailed description of the model training procedure and how you obtained the final model.
 
