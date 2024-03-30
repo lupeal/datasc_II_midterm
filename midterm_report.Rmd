@@ -9,12 +9,15 @@ header-includes:
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, message = FALSE}
 library(tidyverse)
 library(caret)
 library(rsample)
 library(corrplot)
 library(gtsummary)
+library(tidymodels)
+library(mgcv)
+
 
 knitr::opts_chunk$set(
   echo = TRUE, 
@@ -66,20 +69,84 @@ cor_rec |>
 ## Model Training
 To train the models, we partitioned the data into training and testing sets, with 80% of the data (2400 subjects) being assigned to the training set, and the remaining 20% (600 subjects) being assigned to the test set.
 
-We decided to model the data using four approaches, two linear and two non-linear. For the linear approaches, we selected elastic net and partial least squares regression. For the nonlinear approaches, we selected multivariate adaptive regression splines (MARS) and a general additive model (GAM).
-
-ENet
-
-PLS
-
-MARS
-
-GAM
+To predict COVID-19 recovery time, we modeled the data using four approaches -- two linear and two non-linear. For the linear approaches, we selected elastic net and partial least squares regression. For the nonlinear approaches, we selected multivariate adaptive regression splines (MARS) and a general additive model (GAM).
 
 
-In this section, describe the models you used to predict the time to recovery from COVID-19. Briefly state the assumptions made by using the models. Provide a detailed description of the model training procedure and how you obtained the final model.
+```{r, echo = FALSE}
+set.seed(1)
 
-To predict COVID-19 recovery time, we fit 
+#matrix models
+x_training <- model.matrix(recovery_time ~ ., df_train)[, -1]
+y_training <- df_train$recovery_time
+
+x_testing <- model.matrix(recovery_time ~ ., df_test)[, -1]
+y_testing <- df_test$recovery_time
+
+#10foldCV
+ctrl1 <- trainControl(method = 'cv', number = 10)
+```
+
+### Elastic Net Model
+
+```{r, echo = FALSE}
+#elastic net
+set.seed(1)
+
+enet_fit <- train(recovery_time ~ .,
+                  data = df_train,
+                  method = 'glmnet',
+                  tuneGrid = expand.grid(alpha = seq(0, 1, length = 21),
+                                         lambda = exp(seq(-6, 1, length = 100))),
+                  trControl = ctrl1)
+```
+
+
+
+### Partial Least Squares Regression Model
+
+```{r, echo = FALSE}
+#PLS
+set.seed(1)
+
+pls_fit <- train(x_training, y_training,
+                 method = 'pls',
+                 tuneGrid = data.frame(ncomp = 1:15),
+                 trControl = ctrl1,
+                 preProcess = c('center', 'scale'))
+```
+
+
+
+### Multivariate Adaptive Regression Splines Model
+
+```{r, echo = FALSE, message = FALSE}
+#MARS
+set.seed(1)
+
+mars_fit <- train(x_training, y_training,
+                  method = 'earth',
+                  tuneGrid = expand.grid(degree = 1:3,
+                                         nprune = 2:14),
+                  trControl = ctrl1)
+```
+
+
+
+### General Additive Model
+
+```{r, echo = FALSE, message = FALSE}
+#GAM
+set.seed(1)
+
+gam_fit <- train(x_training, y_training,
+                 method = 'gam',
+                 trControl = ctrl1)
+```
+
+
+
+
+
 
 
 
