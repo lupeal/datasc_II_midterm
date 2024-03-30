@@ -166,7 +166,6 @@ To fit the PLS model, we used the training model matrix, based on our training d
 
 
 
-
 ### Multivariate Adaptive Regression Splines Model
 
 ```{r, echo = FALSE, message = FALSE}
@@ -179,6 +178,11 @@ mars_fit <- train(x_training, y_training,
                                          nprune = 2:14),
                   trControl = ctrl1)
 ```
+
+To fit the MARS model, we used the training model matrix and training response vector. Given that we fit a MARS model, the method specified was `earth`, with degrees ranging between 1 and 3 and the maximum number of terms in the pruned model to range between 2 and 14.
+
+
+
 
 
 
