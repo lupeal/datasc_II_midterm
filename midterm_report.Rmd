@@ -56,7 +56,7 @@ df_test = testing(dat_split)
 ```
 
 
-**The table probably goes first**
+**The table probably goes first.**
 
 We found that the COVID-19 infection recovery time is heavily right-skewed: most of the individuals recovered at around 6 weeks, but there are individuals that only recovered from the infection after three months (or more) of being infected. This may mean that we'll need flexible models to capture the skewness of the response.
 
@@ -67,6 +67,8 @@ ggplot(df_train) +
        x = "Recovery time (days)",
        y = "Count")
 ```
+
+**And also the scatterplots with continuous variables**
 
 When evaluating the distribution of recovery time, split into study groups, we find that its different for the two distributions. Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time. 
 
