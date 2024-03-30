@@ -20,6 +20,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Model Training
 
+In this section, describe the models you used to predict the time to recovery from COVID-19. Briefly state the assumptions made by using the models. Provide a detailed description of the model training procedure and how you obtained the final model.
+
+To predict COVID-19 recovery time, we fit 
+
+
+
 ## Results 
 
 Remember to talk about `study` as a variable.
