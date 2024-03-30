@@ -11,16 +11,11 @@ output: pdf_document
 
 ```{r setup, include=FALSE, message = FALSE}
 library(tidyverse)
-<<<<<<< HEAD
 library(tidymodels)
-library(caret)
-knitr::opts_chunk$set(echo = TRUE)
-=======
 library(caret)
 library(rsample)
 library(corrplot)
 library(gtsummary)
-library(tidymodels)
 library(mgcv)
 
 
@@ -29,7 +24,6 @@ knitr::opts_chunk$set(
   fig.width = 6,
   out.width = "65%",
   fig.align = "center")
->>>>>>> a6990e06436ca0d27e5a714488fca5515f49ad5d
 ```
 
 ## Introduction
@@ -38,7 +32,6 @@ This analysis combines three cohort studies regarding recovery time from COVID-1
 
 ## EDA
 
-<<<<<<< HEAD
 ```{r}
 load("files/recovery.RData")
 
@@ -75,7 +68,7 @@ train %>%
        y = "Density",
        color = "Study")
 ```
-=======
+
 ```{r data import, echo=FALSE}
 load("files/recovery.RData")
 
@@ -111,12 +104,15 @@ cor_rec |>
 ```
 **Figure M.** Correlogram of study variables.
 
->>>>>>> a6990e06436ca0d27e5a714488fca5515f49ad5d
 
 ## Model Training
 To train the models, we partitioned the data into training and testing sets, with 80% of the data (2400 subjects) being assigned to the training set, and the remaining 20% (600 subjects) being assigned to the test set.
 
-To predict COVID-19 recovery time, we modeled the data using four approaches -- two linear and two non-linear. For the linear approaches, we selected elastic net and partial least squares regression. For the nonlinear approaches, we selected multivariate adaptive regression splines (MARS) and a general additive model (GAM).
+To predict COVID-19 recovery time, we modeled the data using four approaches -- two linear and two non-linear. For the linear approaches, we selected elastic net and partial least squares regression. For the nonlinear approaches, we selected multivariate adaptive regression splines (MARS) and a general additive model (GAM). 
+
+All models were fitted using the `train()` function in the `caret` package. Although some inputs varied by model, the common inputs were formula or model matrix and response vector, data, method, tuning parameters grid, and cross validation method. 
+
+the `caret` package
 
 
 ```{r, echo = FALSE}
@@ -146,6 +142,9 @@ enet_fit <- train(recovery_time ~ .,
                                          lambda = exp(seq(-6, 1, length = 100))),
                   trControl = ctrl1)
 ```
+
+To fit the elastic net model, we used the model formula with `recovery_time` as the response and all other variables in our training data set to be predictors. Given that we fit an elastic net model, the method specified was `glmnet`, with tuning parameter alpha to be sequenced between 0 and 1 (with length 21) and lambda to be exponentially sequenced between -6 and 1 (with length 100). We settled on this lambda region after fitting the model various times with different regions. We started with a large region (-4 to 4), but realized that our preferred lambda value was close to our lower boundary. Thus, we continued to expand our region until we settled on -6 to 1. Lastly, we used a 10-fold cross validation method.
+
 
 
 
