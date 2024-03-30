@@ -9,15 +9,21 @@ header-includes:
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, message = FALSE}
 library(tidyverse)
+<<<<<<< HEAD
 library(tidymodels)
 library(caret)
 knitr::opts_chunk$set(echo = TRUE)
+=======
+>>>>>>> 95193ac3e0a24b57ad24634d23b4239d604d3c13
 library(caret)
 library(rsample)
 library(corrplot)
 library(gtsummary)
+library(mgcv)
+
+theme_set(theme_bw() + theme(legend.position = "bottom"))
 
 knitr::opts_chunk$set(
   echo = TRUE, 
@@ -31,16 +37,22 @@ knitr::opts_chunk$set(
 This analysis combines three cohort studies regarding recovery time from COVID-19 illness. We have the individual's gender and race, along with other medical information. Among these, stand out their vaccination status and the study (A or B) they were a part of. With this information, we aim to fit a model that can both help us predict recovery time, and help us understand variables strongly associated with increased risk for long COVID-19 recovery times.
 
 ## EDA
+<<<<<<< HEAD
 
 
 ```{r}
+=======
+```{r load data, echo=FALSE}
+>>>>>>> 95193ac3e0a24b57ad24634d23b4239d604d3c13
 load("files/recovery.RData")
+df_rec <- dat |> 
+  select(-id)
 
-dat_split = initial_split(data = dat, prop = 0.8)
+set.seed(1)
+dat_split = initial_split(data = df_rec, prop = 0.8)
 
-train = training(dat_split)
-
-test = testing(dat_split)
+df_train = training(dat_split)
+df_test = testing(dat_split)
 ```
 
 
@@ -48,19 +60,18 @@ test = testing(dat_split)
 
 We found that the COVID-19 infection recovery time is heavily right-skewed: most of the individuals recovered at around 6 weeks, but there are individuals that only recovered from the infection after three months (or more) of being infected. This may mean that we'll need flexible models to capture the skewness of the response.
 
-```{r}
-ggplot(train) +
+```{r histogram of recovery time, echo=FALSE}
+ggplot(df_train) +
   geom_histogram(aes(x = recovery_time), binwidth = 3, fill = "gold2") +
-  theme_bw() + 
-  labs(title = "COVID-1 recovery time is right-skewed",
+  labs(title = "COVID-19 recovery time is right-skewed",
        x = "Recovery time (days)",
        y = "Count")
 ```
 
 When evaluating the distribution of recovery time, split into study groups, we find that its different for the two distributions. Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time. 
 
-```{r}
-train %>%
+```{r density plot by study, echo=FALSE}
+df_train %>%
   ggplot() +
   geom_density(aes(x = recovery_time, col = study)) +
   theme_bw() + 
@@ -69,6 +80,7 @@ train %>%
        y = "Density",
        color = "Study")
 ```
+<<<<<<< HEAD
 
 ```{r data import, echo=FALSE}
 load("files/recovery.RData")
@@ -86,6 +98,8 @@ df_test <- testing(split)
 
 
 
+=======
+>>>>>>> 95193ac3e0a24b57ad24634d23b4239d604d3c13
 
 We also examined the pairwise correlations of the variables, and the correlations of the covariates with the recovery time. There were two clusters of strong correlation (height, weight, and BMI; hypertension and SBP), but these covariates were functionally dependent upon each other. There were no other strong correlations between variables, and no one covariate had an exceptional correlation to recovery time.
 
@@ -105,20 +119,108 @@ cor_rec |>
 ```
 **Figure M.** Correlogram of study variables.
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 95193ac3e0a24b57ad24634d23b4239d604d3c13
 
 ## Model Training
 To train the models, we partitioned the data into training and testing sets, with 80% of the data (2400 subjects) being assigned to the training set, and the remaining 20% (600 subjects) being assigned to the test set.
 
-We decided to model the data using four approaches, two linear and two non-linear. For the linear approaches, we selected elastic net and partial least squares regression. For the nonlinear approaches, we selected multivariate adaptive regression splines (MARS) and a general additive model (GAM).
+To predict COVID-19 recovery time, we modeled the data using four approaches -- two linear and two non-linear. For the linear approaches, we selected elastic net and partial least squares regression. For the nonlinear approaches, we selected multivariate adaptive regression splines (MARS) and a general additive model (GAM). 
 
-ENet
+All models were fitted using the `train()` function in the `caret` package. Although some inputs varied by model, the common inputs were formula or model matrix and response vector, data, method, tuning parameters grid, and a 10-fold cross validation method. 
 
-PLS
+the `caret` package
 
-MARS
 
-GAM
+```{r set cv splits, echo = FALSE}
+set.seed(1)
+
+#matrix models
+x_training <- model.matrix(recovery_time ~ ., df_train)[, -1]
+y_training <- df_train$recovery_time
+
+x_testing <- model.matrix(recovery_time ~ ., df_test)[, -1]
+y_testing <- df_test$recovery_time
+
+#10foldCV
+ctrl1 <- trainControl(method = 'cv', number = 10)
+```
+
+### Elastic Net Model
+
+```{r enet, echo = FALSE}
+#elastic net
+set.seed(1)
+
+enet_fit <- train(recovery_time ~ .,
+                  data = df_train,
+                  method = 'glmnet',
+                  tuneGrid = expand.grid(alpha = seq(0, 1, length = 21),
+                                         lambda = exp(seq(-6, 1, length = 100))),
+                  trControl = ctrl1)
+```
+
+To fit the elastic net model, we used the model formula with `recovery_time` as the response and all other variables in our training data set to be predictors. Given that we fit an elastic net model, the method specified was `glmnet`, with tuning parameter alpha to be sequenced between 0 and 1 (with length 21) and lambda to be exponentially sequenced between -6 and 1 (with length 100). We settled on this lambda region after fitting the model various times with different regions. We started with a large region (-4 to 4), but realized that our preferred lambda value was close to our lower boundary. Thus, we continued to expand our region until we settled on -6 to 1.
+
+
+
+
+### Partial Least Squares (PLS) Regression Model
+
+```{r pls, echo = FALSE}
+#PLS
+set.seed(1)
+
+pls_fit <- train(x_training, y_training,
+                 method = 'pls',
+                 tuneGrid = data.frame(ncomp = 1:15),
+                 trControl = ctrl1,
+                 preProcess = c('center', 'scale'))
+```
+
+To fit the PLS model, we used the training model matrix, based on our training data, and training response vector. Given that we fit a PLS model, the method specified was `pls`, with number of components ranging between 1 and 15. This range is based on the number of variables in our training model matrix. Additionally, the predictor data was centered and scaled -- specified in the `preProcess` input.
+
+
+
+
+### Multivariate Adaptive Regression Splines Model
+
+```{r mars, echo = FALSE, message = FALSE}
+#MARS
+set.seed(1)
+
+mars_fit <- train(x_training, y_training,
+                  method = 'earth',
+                  tuneGrid = expand.grid(degree = 1:3,
+                                         nprune = 2:14),
+                  trControl = ctrl1)
+```
+
+To fit the MARS model, we used the training model matrix and training response vector. Given that we fit a MARS model, the method specified was `earth`, with degrees ranging between 1 and 3 and the maximum number of terms in the pruned model to range between 2 and 14.
+
+
+
+
+
+
+### General Additive Model
+
+```{r gam, echo = FALSE, message = FALSE}
+#GAM
+set.seed(1)
+
+gam_fit <- train(x_training, y_training,
+                 method = 'gam',
+                 trControl = ctrl1)
+```
+
+
+
+
+
+
 
 
 ## Results 
@@ -126,3 +228,5 @@ GAM
 Remember to talk about `study` as a variable.
 
 ## Conclusion
+
+In this project, our goal was to use statistical learning to gain insight into the recovery process of people infected with COVID-19. We fit four models to predict COVID-19 recovery time from a set of 14 covariates, two linear and two nonlinear. Our linear models achieved similar performance in predicting recovery time, but they were outdone by the nonlinear methods, MARS in particular. This improvement in prediction is due to the greater flexibility of the nonlinear methods, but comes at a trade-off of the interpretability of such models. However, as our goal was to develop the best model for predicting COVID-19 recovery time, we are comfortable giving up some of this interpretability, and recommending the MARS model developed above for this task.
