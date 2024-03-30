@@ -192,3 +192,5 @@ gam_fit <- train(x_training, y_training,
 Remember to talk about `study` as a variable.
 
 ## Conclusion
+
+In this project, our goal was to use statistical learning to gain insight into the recovery process of people infected with COVID-19. We fit four models to predict COVID-19 recovery time from a set of 14 covariates, two linear and two nonlinear. Our linear models achieved similar performance in predicting recovery time, but they were outdone by the nonlinear methods, MARS in particular. This improvement in prediction is due to the greater flexibility of the nonlinear methods, but comes at a trade-off of the interpretability of such models. However, as our goal was to develop the best model for predicting COVID-19 recovery time, we are comfortable giving up some of this interpretability, and recommending the MARS model developed above for this task.
