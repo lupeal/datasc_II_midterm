@@ -11,6 +11,12 @@ output: pdf_document
 
 ```{r setup, include=FALSE, message = FALSE}
 library(tidyverse)
+<<<<<<< HEAD
+library(tidymodels)
+library(caret)
+knitr::opts_chunk$set(echo = TRUE)
+=======
+>>>>>>> 95193ac3e0a24b57ad24634d23b4239d604d3c13
 library(caret)
 library(rsample)
 library(corrplot)
@@ -31,7 +37,13 @@ knitr::opts_chunk$set(
 This analysis combines three cohort studies regarding recovery time from COVID-19 illness. We have the individual's gender and race, along with other medical information. Among these, stand out their vaccination status and the study (A or B) they were a part of. With this information, we aim to fit a model that can both help us predict recovery time, and help us understand variables strongly associated with increased risk for long COVID-19 recovery times.
 
 ## EDA
+<<<<<<< HEAD
+
+
+```{r}
+=======
 ```{r load data, echo=FALSE}
+>>>>>>> 95193ac3e0a24b57ad24634d23b4239d604d3c13
 load("files/recovery.RData")
 df_rec <- dat |> 
   select(-id)
@@ -44,7 +56,7 @@ df_test = testing(dat_split)
 ```
 
 
-**The table probably goes first**
+**The table probably goes first.**
 
 We found that the COVID-19 infection recovery time is heavily right-skewed: most of the individuals recovered at around 6 weeks, but there are individuals that only recovered from the infection after three months (or more) of being infected. This may mean that we'll need flexible models to capture the skewness of the response.
 
@@ -55,6 +67,8 @@ ggplot(df_train) +
        x = "Recovery time (days)",
        y = "Count")
 ```
+
+**And also the scatterplots with continuous variables**
 
 When evaluating the distribution of recovery time, split into study groups, we find that its different for the two distributions. Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time. 
 
@@ -68,6 +82,26 @@ df_train %>%
        y = "Density",
        color = "Study")
 ```
+<<<<<<< HEAD
+
+```{r data import, echo=FALSE}
+load("files/recovery.RData")
+
+df_rec <- dat |> 
+  select(-id)
+
+set.seed(1)
+split <- df_rec |> 
+  initial_split(prop = 0.8)
+
+df_train <- training(split)
+df_test <- testing(split)
+```
+
+
+
+=======
+>>>>>>> 95193ac3e0a24b57ad24634d23b4239d604d3c13
 
 We also examined the pairwise correlations of the variables, and the correlations of the covariates with the recovery time. There were two clusters of strong correlation (height, weight, and BMI; hypertension and SBP), but these covariates were functionally dependent upon each other. There were no other strong correlations between variables, and no one covariate had an exceptional correlation to recovery time.
 
@@ -87,6 +121,10 @@ cor_rec |>
 ```
 **Figure M.** Correlogram of study variables.
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 95193ac3e0a24b57ad24634d23b4239d604d3c13
 
 
 
@@ -194,3 +232,5 @@ To fit the GAM, we used the training model matrix and training response vector. 
 Remember to talk about `study` as a variable.
 
 ## Conclusion
+
+In this project, our goal was to use statistical learning to gain insight into the recovery process of people infected with COVID-19. We fit four models to predict COVID-19 recovery time from a set of 14 covariates, two linear and two nonlinear. Our linear models achieved similar performance in predicting recovery time, but they were outdone by the nonlinear methods, MARS in particular. This improvement in prediction is due to the greater flexibility of the nonlinear methods, but comes at a trade-off of the interpretability of such models. However, as our goal was to develop the best model for predicting COVID-19 recovery time, we are comfortable giving up some of this interpretability, and recommending the MARS model developed above for this task.
