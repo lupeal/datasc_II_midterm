@@ -88,14 +88,18 @@ cor_rec |>
 **Figure M.** Correlogram of study variables.
 
 
+
+
 ## Model Training
+
 To train the models, we partitioned the data into training and testing sets, with 80% of the data (2400 subjects) being assigned to the training set, and the remaining 20% (600 subjects) being assigned to the test set.
 
 To predict COVID-19 recovery time, we modeled the data using four approaches -- two linear and two non-linear. For the linear approaches, we selected elastic net and partial least squares regression. For the nonlinear approaches, we selected multivariate adaptive regression splines (MARS) and a general additive model (GAM). 
 
 All models were fitted using the `train()` function in the `caret` package. Although some inputs varied by model, the common inputs were formula or model matrix and response vector, data, method, tuning parameters grid, and a 10-fold cross validation method. 
 
-the `caret` package
+**Note that all models were fit using a seed of 1.**
+
 
 
 ```{r set cv splits, echo = FALSE}
@@ -167,8 +171,6 @@ To fit the MARS model, we used the training model matrix and training response v
 
 
 
-
-
 ### General Additive Model
 
 ```{r gam, echo = FALSE, message = FALSE}
@@ -180,7 +182,7 @@ gam_fit <- train(x_training, y_training,
                  trControl = ctrl1)
 ```
 
-
+To fit the GAM, we used the training model matrix and training response vector. Given that we fit a GAM, the method specified was `gam` and a 10-fold cross validation.
 
 
 
