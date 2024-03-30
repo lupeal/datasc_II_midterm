@@ -11,6 +11,11 @@ output: pdf_document
 
 ```{r setup, include=FALSE, message = FALSE}
 library(tidyverse)
+<<<<<<< HEAD
+library(tidymodels)
+library(caret)
+knitr::opts_chunk$set(echo = TRUE)
+=======
 library(caret)
 library(rsample)
 library(corrplot)
@@ -24,12 +29,53 @@ knitr::opts_chunk$set(
   fig.width = 6,
   out.width = "65%",
   fig.align = "center")
+>>>>>>> a6990e06436ca0d27e5a714488fca5515f49ad5d
 ```
 
 ## Introduction
 
+This analysis combines three cohort studies regarding recovery time from COVID-19 illness. We have the individual's gender and race, along with other medical information. Among these, stand out their vaccination status and the study (A or B) they were a part of. With this information, we aim to fit a model that can both help us predict recovery time, and help us understand variables strongly associated with increased risk for long COVID-19 recovery times.
+
 ## EDA
 
+<<<<<<< HEAD
+```{r}
+load("files/recovery.RData")
+
+dat_split = initial_split(data = dat, prop = 0.8)
+
+train = training(dat_split)
+
+test = testing(dat_split)
+```
+
+
+**The table probably goes first**
+
+We found that the COVID-19 infection recovery time is heavily right-skewed: most of the individuals recovered at around 6 weeks, but there are individuals that only recovered from the infection after three months (or more) of being infected. This may mean that we'll need flexible models to capture the skewness of the response.
+
+```{r}
+ggplot(train) +
+  geom_histogram(aes(x = recovery_time), binwidth = 3, fill = "gold2") +
+  theme_bw() + 
+  labs(title = "COVID-1 recovery time is right-skewed",
+       x = "Recovery time (days)",
+       y = "Count")
+```
+
+When evaluating the distribution of recovery time, split into study groups, we find that its different for the two distributions. Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time. 
+
+```{r}
+train %>%
+  ggplot() +
+  geom_density(aes(x = recovery_time, col = study)) +
+  theme_bw() + 
+  labs(title = "The two studies have different recovery time distributions",
+       x = "Recovery time (days)",
+       y = "Density",
+       color = "Study")
+```
+=======
 ```{r data import, echo=FALSE}
 load("files/recovery.RData")
 
@@ -65,6 +111,7 @@ cor_rec |>
 ```
 **Figure M.** Correlogram of study variables.
 
+>>>>>>> a6990e06436ca0d27e5a714488fca5515f49ad5d
 
 ## Model Training
 To train the models, we partitioned the data into training and testing sets, with 80% of the data (2400 subjects) being assigned to the training set, and the remaining 20% (600 subjects) being assigned to the test set.
