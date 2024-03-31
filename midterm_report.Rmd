@@ -246,6 +246,11 @@ bwplot(rs, metric = "RMSE")
 test_pred <- predict(mars_fit, newdata = x_testing) 
 test_rmse <- sqrt(mean((test_pred - y_testing)^2))
 ```
+
+Our MARS model takes form:
+
+$\hat{Y_i} = 18.40783352 + h(31.1-bmi_i) \times 3.60441290 + h(164-height_i) \times h(bmi_i-31.1) \times studyB_i \times 3.14639435 + h(weight_i-89.3) \times h(bmi_i-31.1) \times studyB_i \times -4.93476240 + h(bmi_i-25.8) \times 6.27226817 + vaccine_i \times -5.83279204 +  h(bmi_i-31.1) \times h(LDL_i-84) \times studyB_i \times 4.45112927 + h(bmi_i-31.1) \times h(LDL_i-79) \times studyB_i \times -4.20896932 + h(bmi_i-25.8) \times h(141-SBP_i) \times -0.07595169 + h(weight_i-78.7) \times h(bmi_i-31.1) \times studyB_i \times 2.87669336 + severity_i \times studyB_i \times 14.3214002 + smoking1_i \times h(bmi_i-31.1) \times studyB_i \times 9.16221829$
+
 Once we decided on MARS as a final model, we calculated the test error using the 20% partition of the initial data set. The test RMSE for the MARS model is `r test_rmse |> round(digits=2)`.
 
 ## Conclusion
