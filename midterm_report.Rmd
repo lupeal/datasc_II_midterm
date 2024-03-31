@@ -189,7 +189,7 @@ pls_fit <- train(x_training, y_training,
                  preProcess = c('center', 'scale'))
 ```
 
-To fit the PLS model, we used the training model matrix, based on our training data, and training response vector. Given that we fit a PLS model, the method specified was `pls`, with number of components ranging between 1 and 15. This range is based on the number of variables in our training model matrix. Additionally, the predictor data was centered and scaled -- specified in the `preProcess` input.
+To fit the PLS model, we used the training model matrix, based on our training data, and training response vector. Given that we fit a PLS model, the method specified was `pls`, with number of components ranging between 1 and 15. This range is based on the number of variables in our training model matrix. Additionally, the predictor data was centered and scaled.
 
 
 ```{r, include = FALSE}
