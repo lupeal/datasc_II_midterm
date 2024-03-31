@@ -196,7 +196,7 @@ To fit the PLS model, we used the training model matrix, based on our training d
 coef(pls_fit$finalModel)
 ```
 
-After fitting the PLS model, the final model is based on 13 components.
+After fitting the PLS model, the final model is based on 13 components. The positive predictor coefficients in the elastic net model were also positive in the PLS model. In this case, the positive coefficients suggest that an increase in a predictor variable (by one standard deviation) is associated with an increase in standardized recovery time by the coefficient value (with standard deviation units).
 
 
 
@@ -218,6 +218,14 @@ mars_fit <- train(x_training, y_training,
 To fit the MARS model, we used the training model matrix and training response vector. Given that we fit a MARS model, the method specified was `earth`, with degrees ranging between 1 and 3 and the maximum number of terms in the pruned model to range between 2 and 14.
 
 
+```{r, include = FALSE}
+coef(mars_fit$finalModel)
+```
+
+After fitting the MARS model, the final model is based on 12 coefficients terms including an intercept based on 9 predictors. The predictors that most inform recovery time are bmi, height, weight, vaccination status, study group B, LDL, systolic blood pressure, COVID-19 severity status, and smoking status.
+
+
+
 
 
 ### General Additive Model
@@ -233,6 +241,10 @@ gam_fit <- train(x_training, y_training,
 
 To fit the GAM, we used the training model matrix and training response vector. Given that we fit a GAM, the method specified was `gam` and a 10-fold cross validation.
 
+
+```{r, include = FALSE}
+gam_fit$finalModel
+```
 
 
 
