@@ -1,0 +1,333 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{setspace}\doublespacing
+\captionsetup[figure]{font=8}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={P8106 Midterm Project: Predicting COVID-19 Recovery Time},
+  pdfauthor={Guadalupe Antonio Lopez, Gustavo Garcia-Franceschini, Derek Lamb; UNI's: GA2612, GEG2145, DRL2168},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{P8106 Midterm Project: Predicting COVID-19 Recovery Time}
+\author{Guadalupe Antonio Lopez, Gustavo Garcia-Franceschini, Derek
+Lamb \and UNI's: GA2612, GEG2145, DRL2168}
+\date{}
+
+\begin{document}
+\maketitle
+
+\hypertarget{introduction}{%
+\subsection{Introduction}\label{introduction}}
+
+This analysis combines three cohort studies regarding recovery time from
+COVID-19 illness. We have the individual's gender and race, along with
+other medical information. Among these, stand out their vaccination
+status and the study (A or B) they were a part of. With this
+information, we aim to fit a model that can both help us predict
+recovery time, and understand variables strongly associated with
+increased risk for long COVID-19 recovery times.
+
+\hypertarget{exploratory-data-analysis}{%
+\subsection{Exploratory Data Analysis}\label{exploratory-data-analysis}}
+
+To start our investigation, we conduct exploratory data analysis. To
+explore our data and train the models, we partitioned the data into
+training and testing sets, with 80\% of the data (2400 subjects) being
+assigned to the training set, and the remaining 20\% (600 subjects)
+being assigned to the test set. This way, the test set is not included
+in our EDA. The split was done with a random seed of 1.
+
+We have 15 variables, including our response (recovery time). We
+calculated summary statistics for 14 of them, grouping them by study
+group, since we are interested in knowing whether the two study groups
+are similar (\textbf{Table 1}). We noticed that they are very similar in
+all our proposed covariates, yet the mean recovery time for individuals
+in gorup B is five days more than for individuals in group A. It is also
+important to note that group A has almost twice as many individuals as
+group B.
+
+\begin{longtable}[]{@{}lcc@{}}
+\caption{Summary statistics}\tabularnewline
+\toprule\noalign{}
+\textbf{Variable} & \textbf{A}, N = 1,598 & \textbf{B}, N = 802 \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\textbf{Variable} & \textbf{A}, N = 1,598 & \textbf{B}, N = 802 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{age} & 60.252 (4.581) & 60.152 (4.401) \\
+\textbf{gender} & 769 (48\%) & 394 (49\%) \\
+\textbf{race} & & \\
+1 & 1,039 (65\%) & 511 (64\%) \\
+2 & 88 (5.5\%) & 43 (5.4\%) \\
+3 & 331 (21\%) & 166 (21\%) \\
+4 & 140 (8.8\%) & 82 (10\%) \\
+\textbf{smoking} & & \\
+0 & 966 (60\%) & 481 (60\%) \\
+1 & 448 (28\%) & 237 (30\%) \\
+2 & 184 (12\%) & 84 (10\%) \\
+\textbf{height} & 169.827 (5.919) & 169.937 (6.005) \\
+\textbf{weight} & 79.933 (7.182) & 80.211 (7.301) \\
+\textbf{bmi} & 27.775 (2.786) & 27.842 (2.875) \\
+\textbf{hypertension} & 799 (50\%) & 388 (48\%) \\
+\textbf{diabetes} & 266 (17\%) & 118 (15\%) \\
+\textbf{SBP} & 130.594 (8.119) & 130.203 (7.787) \\
+\textbf{LDL} & 110.379 (19.754) & 110.642 (20.294) \\
+\textbf{vaccine} & 964 (60\%) & 474 (59\%) \\
+\textbf{severity} & 176 (11\%) & 85 (11\%) \\
+\textbf{recovery\_time} & 40.620 (11.215) & 45.727 (37.982) \\
+\end{longtable}
+
+We further investigate the relationship between study group and recovery
+time in \textbf{Figure 1}. We found that the COVID-19 infection recovery
+time is heavily right-skewed, regardless of the study group. However,
+Study A has a later peak, while Study B has a heavier tail,
+corresponding to more individuals in that study experiencing longer
+recovery time. This is an early indication that study group might be an
+important variable when predicting recovery time.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.65\linewidth]{midterm_report_files/figure-latex/density_plot_by_study-1} 
+
+}
+
+\caption{Recovery time density, by study group}\label{fig:density_plot_by_study}
+\end{figure}
+
+In \textbf{Figure 2}, we plotted our continuous variables on the x-axis,
+with recovery time on the y-axis. We see that bmi and height have some
+non-linearity, with higher bmi and lower height associated with higher
+recovery times, but values in the middle or opposing end not showing any
+particular pattern. Age, weight, SBP and LDL show some outliers in the
+middle of their ranges. These observations suggest we should implement
+models that account for non-linearity.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.65\linewidth]{midterm_report_files/figure-latex/scatterplot-1} 
+
+}
+
+\caption{Continuous variables plotted against recovery time}\label{fig:scatterplot}
+\end{figure}
+
+We also examined the pairwise correlations of the variables, and the
+correlations of the covariates with the recovery time. There were two
+clusters of strong correlation (height, weight, and BMI; hypertension
+and SBP), but these covariates were functionally dependent upon each
+other. There were no other strong correlations between variables, and no
+one covariate had an exceptional correlation to recovery time.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.65\linewidth]{midterm_report_files/figure-latex/corrplot-1} 
+
+}
+
+\caption{Variable correlation plot}\label{fig:corrplot}
+\end{figure}
+
+\hypertarget{model-training}{%
+\subsection{Model Training}\label{model-training}}
+
+To predict COVID-19 recovery time, we modeled the data using four
+approaches -- two linear and two non-linear. For the linear approaches,
+we selected elastic net and partial least squares regression. For the
+nonlinear approaches, we selected multivariate adaptive regression
+splines (MARS) and a general additive model (GAM). As specified before,
+we use our training set to train all models.
+
+All models were fitted using the \texttt{train()} function in the
+\texttt{caret} package. Although some inputs varied by model, the common
+inputs were formula or model matrix and response vector, data, method,
+tuning parameters grid, and a 10-fold cross validation method.
+\textbf{Note that all models were fit using a seed of 1.}
+
+\hypertarget{elastic-net-model}{%
+\subsubsection{Elastic Net Model}\label{elastic-net-model}}
+
+To fit the elastic net model, we used the model formula with
+\texttt{recovery\_time} as the response and all other variables in our
+training data set to be predictors. Given that we fit an elastic net
+model, the method specified was \texttt{glmnet}, with tuning parameter
+alpha to be sequenced between 0 and 1 (with length 21) and lambda to be
+exponentially sequenced between -6 and 1 (with length 100). We settled
+on this lambda region after fitting the model various times with
+different regions. We started with a large region (-4 to 4), but
+realized that our preferred lambda value was close to our lower
+boundary. Thus, we continued to expand our region until we settled on -6
+to 1.
+
+After fitting the elastic net model, the final model based on the
+optimal lambda contained 17 predictors and an intercept -- no predictors
+were shrunk to zero. The values for each predictor represent the
+estimated effect of each predictor on recovery time. Based on our
+output, age, height, bmi, and systolic blood pressure had positive
+coefficients. This suggests that an increase in a given predictor is
+associated with an increase in recovery time. There were also positive
+coefficients for categorical variables race (asian), former and current
+smoking status, hypertension, systolic blood pressure, severity, and
+study B. These positive coefficients indicate the difference in the
+outcome compared to their reference level.
+
+\hypertarget{partial-least-squares-pls-regression-model}{%
+\subsubsection{Partial Least Squares (PLS) Regression
+Model}\label{partial-least-squares-pls-regression-model}}
+
+To fit the PLS model, we used the training model matrix, based on our
+training data, and training response vector. Given that we fit a PLS
+model, the method specified was \texttt{pls}, with number of components
+ranging between 1 and 15. This range is based on the number of variables
+in our training model matrix. Additionally, the predictor data was
+centered and scaled.
+
+After fitting the PLS model, the final model is based on 13 components.
+The positive predictor coefficients in the elastic net model were also
+positive in the PLS model. In this case, the positive coefficients
+suggest that an increase in a predictor variable (by one standard
+deviation) is associated with an increase in standardized recovery time
+by the coefficient value (with standard deviation units).
+
+\hypertarget{multivariate-adaptive-regression-splines-model}{%
+\subsubsection{Multivariate Adaptive Regression Splines
+Model}\label{multivariate-adaptive-regression-splines-model}}
+
+To fit the MARS model, we used the training model matrix and training
+response vector. Given that we fit a MARS model, the method specified
+was \texttt{earth}, with degrees ranging between 1 and 3 and the maximum
+number of terms in the pruned model to range between 2 and 14.
+
+After fitting the MARS model, the final model is based on 12
+coefficients terms including an intercept based on 9 predictors. The
+predictors that most inform recovery time are bmi, height, weight,
+vaccination status, study group B, LDL, systolic blood pressure,
+COVID-19 severity status, and smoking status.
+
+\hypertarget{general-additive-model}{%
+\subsubsection{General Additive Model}\label{general-additive-model}}
+
+To fit the GAM, we used the training model matrix and training response
+vector. Given that we fit a GAM, the method specified was \texttt{gam}
+and a 10-fold cross validation.
+
+The final GAM contains categorical predictors gender, race (all levels),
+current smoking status, hypertension, diabetes, vaccination status,
+COVID-19 severity status, study group B, and smooth terms applied to
+continuous variables age, systolic blood pressure, LDL, bmi, height,
+weight. The model has a total estimated degrees of freedom of 35.99,
+which suggests a relatively flexible model.
+
+\hypertarget{results}{%
+\subsection{Results}\label{results}}
+
+We then compared the four models that we fit by resampling on the
+training set. In the figure below, we constructed boxplots to compare
+the four different models by their resampled RMSE. The two linear models
+and GAM perform about the same, though GAM was a bit better on average.
+MARS noticeably outperformed the other models.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.65\linewidth]{midterm_report_files/figure-latex/resamples-1} 
+
+}
+
+\caption{Resampled RMSE for our four models}\label{fig:resamples}
+\end{figure}
+
+Once we decided on MARS as a final model, we calculated the test error
+using the 20\% partition of the initial data set.
+
+The test RMSE for the MARS model is 17.18.
+
+\hypertarget{conclusion}{%
+\subsection{Conclusion}\label{conclusion}}
+
+In this project, our goal was to use statistical learning to gain
+insight into the recovery process of people infected with COVID-19. We
+fit four models to predict COVID-19 recovery time from a set of 14
+covariates, two linear and two nonlinear. Our linear models achieved
+similar performance in predicting recovery time, but they were outdone
+by the nonlinear methods, MARS in particular. This improvement in
+prediction is due to the greater flexibility of the nonlinear methods,
+but comes at a trade-off of the interpretability of such models.
+However, as our goal was to develop the best model for predicting
+COVID-19 recovery time, we are comfortable giving up some of this
+interpretability, and recommending the MARS model developed above for
+this task.
+
+\end{document}
