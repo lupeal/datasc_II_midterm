@@ -34,7 +34,7 @@ This analysis combines three cohort studies regarding recovery time from COVID-1
 ## EDA
 
 
-```{r}
+```{r, echo = FALSE}
 load("files/recovery.RData")
 df_rec <- dat |> 
   select(-id)
@@ -45,6 +45,20 @@ dat_split = initial_split(data = df_rec, prop = 0.8)
 df_train = training(dat_split)
 df_test = testing(dat_split)
 ```
+
+
+```{r, echo = FALSE}
+df_rec %>%
+  tbl_summary(by = study,
+              statistic = list(all_continuous() ~ '{mean} ({sd})',
+                             all_categorical() ~ '{n} ({p}%)'),
+              digits = all_continuous() ~ 3) %>%
+  modify_spanning_header(c('stat_1', 'stat_2') ~ '**Study**') %>%
+  modify_header(label = '**Variable**') %>%
+  bold_labels() %>%
+  modify_caption('Table 1. Summary statistics')
+```
+
 
 
 **The table probably goes first.**
@@ -59,7 +73,19 @@ ggplot(df_train) +
        y = "Count")
 ```
 
+
+
+```{r, echo = FALSE}
+x <- model.matrix(recovery_time ~ ., df_rec)[, -1]
+y <- df_rec$recovery_time
+
+featurePlot(x[, c(2, 9:11, 14,15)], y, plot = 'scatter', 
+            labels = c('', 'Y'), type = c('p'))
+```
+
 **And also the scatterplots with continuous variables**
+
+
 
 When evaluating the distribution of recovery time, split into study groups, we find that its different for the two distributions. Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time. 
 
@@ -75,19 +101,6 @@ df_train %>%
 ```
 
 
-```{r data import, echo=FALSE}
-load("files/recovery.RData")
-
-df_rec <- dat |> 
-  select(-id)
-
-set.seed(1)
-split <- df_rec |> 
-  initial_split(prop = 0.8)
-
-df_train <- training(split)
-df_test <- testing(split)
-```
 
 
 We also examined the pairwise correlations of the variables, and the correlations of the covariates with the recovery time. There were two clusters of strong correlation (height, weight, and BMI; hypertension and SBP), but these covariates were functionally dependent upon each other. There were no other strong correlations between variables, and no one covariate had an exceptional correlation to recovery time.
@@ -177,6 +190,14 @@ pls_fit <- train(x_training, y_training,
 ```
 
 To fit the PLS model, we used the training model matrix, based on our training data, and training response vector. Given that we fit a PLS model, the method specified was `pls`, with number of components ranging between 1 and 15. This range is based on the number of variables in our training model matrix. Additionally, the predictor data was centered and scaled -- specified in the `preProcess` input.
+
+
+```{r, include = FALSE}
+coef(pls_fit$finalModel)
+```
+
+After fitting the PLS model, the final model is based on 13 components.
+
 
 
 
