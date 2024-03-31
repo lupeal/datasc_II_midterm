@@ -220,6 +220,8 @@ To fit the GAM, we used the training model matrix and training response vector. 
 gam_fit$finalModel
 ```
 
+The final GAM contains categorical predictors gender, race (all levels), current smoking status, hypertension, diabetes, vaccination status, COVID-19 severity status, study group B, and smooth terms applied to continuous variables age, systolic blood pressure, LDL, bmi, height, weight. The model has a total estimated degrees of freedom of 35.99, which suggests a relatively flexible model. 
+
 
 
 
