@@ -18,6 +18,7 @@ library(rsample)
 library(corrplot)
 library(gtsummary)
 library(mgcv)
+library(gridExtra)
 
 theme_set(theme_bw() + theme(legend.position = "bottom"))
 
@@ -61,29 +62,34 @@ df_train %>%
 ```
 
 
-We further investigate the relationship between study group and recovery time in **Figure 1**. We found that the COVID-19 infection recovery time is heavily right-skewed, regardless of the study group. However, Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time. We decided to include the study variable in the training process, and allow CV procedures to determine whether it is a useful predictor of recovery time.
+We further investigate the relationship between study group and recovery time in **Figure 1A**. We found that the COVID-19 infection recovery time is heavily right-skewed, regardless of the study group. However, Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time. We decided to include the study variable in the training process, and allow CV procedures to determine whether it is a useful predictor of recovery time.
 
+In **Figure 1B**, we plotted some relevant variables on the x-axis, with recovery time on the y-axis. We see that bmi has some non-linearity, while weight and LDL show some outliers in the middle of their ranges. These observations suggest we should implement models that account for non-linearity. Our categorical variables plotted have similar recovery time distributions.
 
-```{r density_plot_by_study, echo=FALSE, fig.cap="Recovery time density, by study group"}
-df_train %>%
+```{r combined plot, echo=FALSE, fig.cap="Relationship between covariates and recovery time. A. Density of recovery time by study. B. Scatterplots of continuous variables against recovery time", fig.width=10, fig.height=4, out.width="90%"}
+# density plot
+dens_plot <- df_train |> 
   ggplot() +
   geom_density(aes(x = recovery_time, col = study)) +
   theme_bw() + 
-  labs(title = "The two studies have different recovery time distributions",
+  labs(
        x = "Recovery time (days)",
        y = "Density",
-       color = "Study")
-```
+       color = "Study") +
+  ggtitle(bquote(bold("A")))
 
-In **Figure 2**, we plotted some relevant variables on the x-axis, with recovery time on the y-axis. We see that bmi has some non-linearity, while weight and LDL show some outliers in the middle of their ranges. These observations suggest we should implement models that account for non-linearity. Our categorical variables plotted have similar revoery time distributions.
-
-```{r scatterplot, echo=FALSE, fig.cap = "Continuous variables plotted against recovery time"}
+# feature plot
 x <- model.matrix(recovery_time ~ ., df_train)[, -1]
 y <- df_train$recovery_time
 
-featurePlot(x[, c(2, 9:11, 14,15)], y, plot = 'scatter', 
-          labels = c('', 'recovery time'), type = c('p'))
+feat_plot <- featurePlot(x[, c(1, 8:10, 13:14)], y, plot = 'scatter', 
+          labels = c('', 'recovery time'), type = c('p'), 
+          main=list(label = "B", cex = 1.1, x=0.2, y=0.2))
+
+# combine them
+grid.arrange(dens_plot, feat_plot, ncol=2)
 ```
+
 
 We also examined the pairwise correlations of the variables, and the correlations of the covariates with the recovery time. There were two clusters of strong correlation (height, weight, and BMI; hypertension and SBP), but these covariates were functionally dependent upon each other. There were no other strong correlations between variables, and no one covariate had an exceptional correlation to recovery time.
 
