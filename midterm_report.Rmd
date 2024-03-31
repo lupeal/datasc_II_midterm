@@ -53,10 +53,10 @@ We calculated summary statistics for our variables, grouping them by study group
 df_rec |> 
   mutate(
     race = case_match(race,
-      "1" ~ "white",
-      "2" ~ "asian",
-      "3" ~ "black",
-      "4" ~ "hispanic"),
+      "1" ~ "White",
+      "2" ~ "Asian",
+      "3" ~ "Black",
+      "4" ~ "Hispanic"),
     smoking = case_match(smoking,
       "0" ~ "never",
       "1" ~ "current",
