@@ -5,7 +5,7 @@ author:
   -  "UNI's: GA2612, GEG2145, DRL2168"
 header-includes:
     - \usepackage{setspace}\doublespacing
-    - \captionsetup[figure]{font=8}
+    - \usepackage[font={small}]{caption}
 
 output: pdf_document
 ---
@@ -23,16 +23,14 @@ theme_set(theme_bw() + theme(legend.position = "bottom"))
 
 knitr::opts_chunk$set(
   echo = TRUE, 
-  fig.width = 6,
+  fig.width = 5,
   out.width = "65%",
   fig.align = "center")
 ```
 
-## Introduction
+## Introduction and Exploratory Data Analysis
 
 This analysis combines three cohort studies regarding recovery time from COVID-19 illness. We have the individual's gender and race, along with other medical information. Among these, stand out their vaccination status and the study (A or B) they were a part of. With this information, we aim to fit a model that can both help us predict recovery time, and understand variables strongly associated with increased risk for long COVID-19 recovery times.
-
-## Exploratory Data Analysis
 
 To start our investigation, we conduct exploratory data analysis. To explore our data and train the models, we partitioned the data into training and testing sets, with 80% of the data (2400 subjects) being assigned to the training set, and the remaining 20% (600 subjects) being assigned to the test set. This way, the test set is not included in our EDA. The split was done with a random seed of 1.
 
@@ -48,15 +46,10 @@ df_train = training(dat_split)
 df_test = testing(dat_split)
 ```
 
-We have 15 variables, including our response (recovery time). We calculated summary statistics for 14 of them, grouping them by study group, since we are interested in knowing whether the two study groups are similar (**Table 1**). We noticed that they are very similar in all our proposed covariates, yet the mean recovery time for individuals in gorup B is five days more than for individuals in group A. It is also important to note that group A has almost twice as many individuals as group B.
+We calculated summary statistics for our variables, grouping them by study group,  in **Table 1**. We noticed that they are very similar in all our proposed covariates, yet the mean recovery time for individuals in gorup B is five days more than for individuals in group A. It is also important to note that group A has almost twice as many individuals as group B.
 
-<<<<<<< HEAD
 ```{r, echo = FALSE, message = FALSE}
 df_train %>%
-=======
-```{r table, echo = FALSE, message = FALSE}
-df_rec %>%
->>>>>>> c8ce2441f95c4bb4ccaa546e08e9db22225d8df3
   tbl_summary(by = study,
               statistic = list(all_continuous() ~ '{mean} ({sd})',
                              all_categorical() ~ '{n} ({p}%)'),
@@ -67,11 +60,9 @@ df_rec %>%
   modify_caption('Summary statistics')
 ```
 
-<<<<<<< HEAD
-We further investigate the relationship between study group and recovery time in **Figure 1**. We found that the COVID-19 infection recovery time is heavily right-skewed, regardless of the study group. However, Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time.
-=======
-We found that the COVID-19 infection recovery time is heavily right-skewed, regardless of the study group. However, Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time. We decided to include the study variable in the training process, and allow CV procedures to determine whether it is a useful predictor of recovery time.
->>>>>>> c8ce2441f95c4bb4ccaa546e08e9db22225d8df3
+
+We further investigate the relationship between study group and recovery time in **Figure 1**. We found that the COVID-19 infection recovery time is heavily right-skewed, regardless of the study group. However, Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time. We decided to include the study variable in the training process, and allow CV procedures to determine whether it is a useful predictor of recovery time.
+
 
 ```{r density_plot_by_study, echo=FALSE, fig.cap="Recovery time density, by study group"}
 df_train %>%
@@ -84,28 +75,14 @@ df_train %>%
        color = "Study")
 ```
 
-In **Figure 2**, we plotted our continuous variables on the x-axis, with recovery time on the y-axis. We see that bmi and height have some non-linearity, with higher bmi and lower height associated with higher recovery times, but values in the middle or opposing end not showing any particular pattern. Age, weight, SBP and LDL show some outliers in the middle of their ranges. These observations suggest we should implement models that account for non-linearity.
+In **Figure 2**, we plotted some relevant variables on the x-axis, with recovery time on the y-axis. We see that bmi has some non-linearity, while weight and LDL show some outliers in the middle of their ranges. These observations suggest we should implement models that account for non-linearity. Our categorical variables plotted have similar revoery time distributions.
 
 ```{r scatterplot, echo=FALSE, fig.cap = "Continuous variables plotted against recovery time"}
 x <- model.matrix(recovery_time ~ ., df_train)[, -1]
 y <- df_train$recovery_time
 
-<<<<<<< HEAD
-#featurePlot(x[, c(2, 9:11, 14,15)], y, plot = 'scatter', 
-#            labels = c('', 'recovery time'), type = c('p'))
-
-selected = df_train %>%
-  select(age, height, weight, bmi, SBP, LDL, recovery_time)
-
-x <- model.matrix(recovery_time ~ ., selected)[, -1]
-y <- df_train$recovery_time
-
-featurePlot(x, y, plot = 'scatter', 
+featurePlot(x[, c(2, 9:11, 14,15)], y, plot = 'scatter', 
           labels = c('', 'recovery time'), type = c('p'))
-=======
-featurePlot(x[, c(1, 8:10, 13,14)], y, plot = 'scatter', 
-            labels = c('', 'Y'), type = c('p'), caption = "dvjnv")
->>>>>>> c8ce2441f95c4bb4ccaa546e08e9db22225d8df3
 ```
 
 We also examined the pairwise correlations of the variables, and the correlations of the covariates with the recovery time. There were two clusters of strong correlation (height, weight, and BMI; hypertension and SBP), but these covariates were functionally dependent upon each other. There were no other strong correlations between variables, and no one covariate had an exceptional correlation to recovery time.
@@ -130,14 +107,8 @@ cor_rec |>
 
 To predict COVID-19 recovery time, we modeled the data using four approaches -- two linear and two non-linear. For the linear approaches, we selected elastic net and partial least squares regression. For the nonlinear approaches, we selected multivariate adaptive regression splines (MARS) and a general additive model (GAM). As specified before, we use our training set to train all models.
 
-<<<<<<< HEAD
-All models were fitted using the `train()` function in the `caret` package. Although some inputs varied by model, the common inputs were formula or model matrix and response vector, data, method, tuning parameters grid, and a 10-fold cross validation method. **Note that all models were fit using a seed of 1.**
+All models were fitted using the `train()` function in the `caret` package. Although some inputs varied by model, the common inputs were formula or model matrix and response vector, data, method, tuning parameters grid, and a 10-fold cross validation method. We used a common seed (1) to partition the data and train all models.
 
-=======
-To predict COVID-19 recovery time, we modeled the data using four approaches -- two linear and two non-linear. For the linear approaches, we selected elastic net and partial least squares regression. For the nonlinear approaches, we selected multivariate adaptive regression splines (MARS) and a general additive model (GAM). 
-
-All models were fitted using the `train()` function in the `caret` package. Although some inputs varied by model, the common inputs were formula or model matrix and response vector, data, method, tuning parameters grid, and a 10-fold cross validation method. We used a common seed (1) to partition the data and train all models
->>>>>>> c8ce2441f95c4bb4ccaa546e08e9db22225d8df3
 
 ```{r set cv splits, echo = FALSE}
 set.seed(1)
@@ -167,12 +138,7 @@ enet_fit <- train(recovery_time ~ .,
                   trControl = ctrl1)
 ```
 
-<<<<<<< HEAD
-To fit the elastic net model, we used the model formula with `recovery_time` as the response and all other variables in our training data set to be predictors. Given that we fit an elastic net model, the method specified was `glmnet`, with tuning parameter alpha to be sequenced between 0 and 1 (with length 21) and lambda to be exponentially sequenced between -6 and 1 (with length 100).
-=======
 To fit the elastic net model, we used the model formula with `recovery_time` as the response and all other variables in our training data set to be predictors. We fit models with tuning parameter alpha to be evenly spaced between 0 and 1 (with length 21) and lambda to be exponentially spaced between -6 and 1 (with length 100). We settled on this lambda region after fitting the model various times with different regions. We started with a large region (-4 to 4), but realized that our preferred lambda value was close to our lower boundary. Thus, we continued to expand our region until we settled on -6 to 1.
-
->>>>>>> c8ce2441f95c4bb4ccaa546e08e9db22225d8df3
 
 ```{r, include = FALSE}
 coef(enet_fit$finalModel, enet_fit$bestTune$lambda)
@@ -202,7 +168,6 @@ coef(pls_fit$finalModel)
 
 After fitting the PLS model, the final model was based on 13 components. The positive predictor coefficients in the elastic net model were also positive in the PLS model. In this case, the positive coefficients suggest that an increase in a predictor variable (by one standard deviation) is associated with an increase in standardized recovery time by the coefficient value (with standard deviation units).
 
-
 ### Multivariate Adaptive Regression Splines Model
 
 ```{r mars, echo = FALSE, message = FALSE}
@@ -217,7 +182,6 @@ mars_fit <- train(x_training, y_training,
 ```
 
 To fit the MARS model, we used the training model matrix and training response vector. For tuning the MARS model, we examined degrees ranging between 1 and 3 and the maximum number of terms in the pruned model to range between 2 and 14.
-
 
 ```{r, include = FALSE}
 coef(mars_fit$finalModel)
@@ -236,11 +200,7 @@ gam_fit <- train(x_training, y_training,
                  trControl = ctrl1)
 ```
 
-<<<<<<< HEAD
-To fit the GAM, we used the training model matrix and training response vector. Given that we fit a GAM, the method specified was `gam` and a 10-fold cross validation.
-=======
 To fit the GAM, we used the training model matrix and training response vector. We used generalized cross-validation with Mallow's Cp to select the smoothing paramter, and considered both "True" and "False" selection.
->>>>>>> c8ce2441f95c4bb4ccaa546e08e9db22225d8df3
 
 ```{r, include = FALSE}
 gam_fit$finalModel
