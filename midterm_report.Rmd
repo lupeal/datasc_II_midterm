@@ -29,10 +29,9 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-This analysis combines three cohort studies regarding recovery time from COVID-19 illness. We have the individual's gender and race, along with other medical information. Among these, stand out their vaccination status and the study (A or B) they were a part of. With this information, we aim to fit a model that can both help us predict recovery time, and help us understand variables strongly associated with increased risk for long COVID-19 recovery times.
+This analysis combines three cohort studies regarding recovery time from COVID-19 illness. We have the individual's gender and race, along with other medical information. Among these, stand out their vaccination status and the study (A or B) they were a part of. With this information, we aim to fit a model that can both help us predict recovery time, and understand variables strongly associated with increased risk for long COVID-19 recovery times.
 
 ## EDA
-
 
 ```{r, echo = FALSE}
 load("files/recovery.RData")
@@ -56,40 +55,12 @@ df_rec %>%
   modify_spanning_header(c('stat_1', 'stat_2') ~ '**Study**') %>%
   modify_header(label = '**Variable**') %>%
   bold_labels() %>%
-  modify_caption('Summary statistics')
+  modify_caption('Table 1: Summary statistics')
 ```
 
+We found that the COVID-19 infection recovery time is heavily right-skewed, regardless of the study group. However, Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time.
 
-
-**The table probably goes first.**
-
-We found that the COVID-19 infection recovery time is heavily right-skewed: most of the individuals recovered at around 6 weeks, but there are individuals that only recovered from the infection after three months (or more) of being infected. This may mean that we'll need flexible models to capture the skewness of the response.
-
-```{r histogram of recovery time, echo=FALSE}
-ggplot(df_train) +
-  geom_histogram(aes(x = recovery_time), binwidth = 3, fill = "gold2") +
-  labs(title = "COVID-19 recovery time is right-skewed",
-       x = "Recovery time (days)",
-       y = "Count")
-```
-
-
-
-```{r, echo = FALSE}
-x <- model.matrix(recovery_time ~ ., df_rec)[, -1]
-y <- df_rec$recovery_time
-
-featurePlot(x[, c(2, 9:11, 14,15)], y, plot = 'scatter', 
-            labels = c('', 'Y'), type = c('p'))
-```
-
-**And also the scatterplots with continuous variables**
-
-
-
-When evaluating the distribution of recovery time, split into study groups, we find that its different for the two distributions. Study A has a later peak, while Study B has a heavier tail, corresponding to more individuals in that study experiencing longer recovery time. This is an early indication that study group might be an important variable when predicting recovery time. 
-
-```{r density plot by study, echo=FALSE}
+```{r density_plot_by_study, echo=FALSE}
 df_train %>%
   ggplot() +
   geom_density(aes(x = recovery_time, col = study)) +
@@ -102,6 +73,13 @@ df_train %>%
 
 
 
+```{r scatterplot, echo=FALSE}
+x <- model.matrix(recovery_time ~ ., df_rec)[, -1]
+y <- df_rec$recovery_time
+
+featurePlot(x[, c(2, 9:11, 14,15)], y, plot = 'scatter', 
+            labels = c('', 'Y'), type = c('p'))
+```
 
 We also examined the pairwise correlations of the variables, and the correlations of the covariates with the recovery time. There were two clusters of strong correlation (height, weight, and BMI; hypertension and SBP), but these covariates were functionally dependent upon each other. There were no other strong correlations between variables, and no one covariate had an exceptional correlation to recovery time.
 
@@ -119,10 +97,6 @@ cor_rec |>
   cor() |> 
   corrplot()
 ```
-**Figure M.** Correlogram of study variables.
-
-
-
 
 
 ## Model Training
