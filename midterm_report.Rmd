@@ -47,7 +47,7 @@ df_test = testing(dat_split)
 ```
 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, message = FALSE}
 df_rec %>%
   tbl_summary(by = study,
               statistic = list(all_continuous() ~ '{mean} ({sd})',
@@ -56,7 +56,7 @@ df_rec %>%
   modify_spanning_header(c('stat_1', 'stat_2') ~ '**Study**') %>%
   modify_header(label = '**Variable**') %>%
   bold_labels() %>%
-  modify_caption('Table 1. Summary statistics')
+  modify_caption('Summary statistics')
 ```
 
 
