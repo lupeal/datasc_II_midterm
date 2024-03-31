@@ -61,7 +61,6 @@ df_rec %>%
 
 
 
-**The table probably goes first.**
 
 We found that the COVID-19 infection recovery time is heavily right-skewed: most of the individuals recovered at around 6 weeks, but there are individuals that only recovered from the infection after three months (or more) of being infected. This may mean that we'll need flexible models to capture the skewness of the response.
 
@@ -82,8 +81,6 @@ y <- df_rec$recovery_time
 featurePlot(x[, c(2, 9:11, 14,15)], y, plot = 'scatter', 
             labels = c('', 'Y'), type = c('p'))
 ```
-
-**And also the scatterplots with continuous variables**
 
 
 
