@@ -50,7 +50,7 @@ df_test = testing(dat_split)
 We calculated summary statistics for our variables, grouping them by study group,  in **Table 1**. We noticed that they are very similar in all our proposed covariates, yet the mean recovery time for individuals in gorup B is five days more than for individuals in group A. It is also important to note that group A has almost twice as many individuals as group B.
 
 ```{r, echo = FALSE, message = FALSE}
-df_rec |> 
+df_train |> 
   mutate(
     race = case_match(race,
       "1" ~ "White",
