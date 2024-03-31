@@ -251,9 +251,7 @@ Our MARS model takes form:
 
 $\hat{Y_i} = 18.408 + h(31.1-bmi_i) \times 3.604 + h(164-height_i) \times h(bmi_i-31.1) \times studyB_i \times 3.146 + h(weight_i-89.3) \times h(bmi_i-31.1) \times studyB_i \times -4.935 + h(bmi_i-25.8) \times 6.272 + vaccine_i \times -5.833 +  h(bmi_i-31.1) \times h(LDL_i-84) \times studyB_i \times 4.451 + h(bmi_i-31.1) \times h(LDL_i-79) \times studyB_i \times -4.209 + h(bmi_i-25.8) \times h(141-SBP_i) \times -0.076 + h(weight_i-78.7) \times h(bmi_i-31.1) \times studyB_i \times 2.877 + severity_i \times studyB_i \times 14.321 + smoking1_i \times h(bmi_i-31.1) \times studyB_i \times 9.162$
 
-We see the association between study B and recovery time in this model. For example, for bmi greater than 31.1, the association between study B and recovery time is positive if the height is less than 164, but negative if the weight is above 89.3. We are unable to get a sense of the overall association between study B and recovery time using MARS, which is one of the downsides of the model. 
-
-Once we decided on MARS as a final model, we calculated the test error using the 20% partition of the initial data set. The test RMSE for the MARS model is `r test_rmse |> round(digits=2)`.
+We see the association between study B and recovery time in this model. For example, for bmi greater than 31.1, the association between study B and recovery time is positive if the height is less than 164, but negative if the weight is above 89.3. We are unable to get a sense of the overall association between study B and recovery time using MARS, which is one of the downsides of the model. We can, however, say that the study group is clearly important in predicting recovery time, since it it included in many of the terms of the model. The test RMSE for the MARS model is `r test_rmse |> round(digits=2)`.
 
 ## Conclusion
 
