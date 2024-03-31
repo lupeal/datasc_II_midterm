@@ -240,7 +240,27 @@ To fit the GAM, we used the training model matrix and training response vector. 
 
 ## Results 
 
-Remember to talk about `study` as a variable.
+
+We then compared the four models that we fit by resampling on the training set. In the figure below, we constructed boxplots to compare the four different models by their resampled RMSE. The two linear models and GAM perform about the same, though GAM was a bit better on average. MARS noticeably outperformed the other models.
+
+```{r resamples, echo=FALSE}
+rs = resamples(list(
+  ElasticNet = enet_fit,
+  PLS = pls_fit,
+  MARS = mars_fit,
+  GAM = gam_fit
+))
+
+bwplot(rs, metric = "RMSE")
+```
+
+Once we decided on MARS as a final model, we calculated the test error using the 20% partition of the initial data set.
+```{r final test error, echo=FALSE}
+test_pred <- predict(mars_fit, newdata = x_testing) 
+test_rmse <- sqrt(mean((test_pred - y_testing)^2))
+```
+The test RMSE for the MARS model is `r test_rmse |> round(digits=2)`.
+
 
 ## Conclusion
 
